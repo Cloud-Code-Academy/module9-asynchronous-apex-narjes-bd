@@ -22,7 +22,7 @@ public with sharing class NextStepBatch implements Database.Batchable<sObject>{
 
     public Database.QueryLocator start(Database.BatchableContext bc){
         // Query for all accounts and return the query locator.
-        return null; // Update null with the query locator
+        return Database.getQueryLocator([SELECT Id, Next_Step__c FROM Account]);
     }
     
     public void execute(Database.BatchableContext bc, List<Account> scope){
@@ -35,6 +35,10 @@ public with sharing class NextStepBatch implements Database.Batchable<sObject>{
             // Set the Next Step field to 'Batching the next meetings together.'
 
         // Update the account records in this batch scope
+        for(Account acc : scope){
+            acc.Next_Step__c = BATCH_NEXT_STEP;
+        }
+        update scope;
         
         // Query for all opportunities related to the accounts in this batch scope
 
@@ -43,6 +47,11 @@ public with sharing class NextStepBatch implements Database.Batchable<sObject>{
             // Set the Next Step field to 'Batching the next meetings together.'
 
         // Update the opportunity records
+        List<Opportunity> opps = [SELECT Id, NextStep FROM Opportunity WHERE AccountId IN :scope];
+        for(Opportunity opp : opps){
+            opp.NextStep = BATCH_NEXT_STEP;
+        }
+        update opps;
 
     }
     
@@ -52,6 +61,9 @@ public with sharing class NextStepBatch implements Database.Batchable<sObject>{
         // Get the email addresses of all active users
 
             // Pass the set of active user emails to the sendEmailToActiveUsers method
+            for (User u : USERS) {
+                sendEmailToActiveUsers(new Set<String>{u.Email});
+            }
     }
 
     // Helper method to send an email to all emails in the set

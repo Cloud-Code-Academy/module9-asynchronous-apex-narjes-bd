@@ -27,9 +27,26 @@ public with sharing class NextStepFuture {
      * Opportunity Next Step field is a standard field
      * Update the corresponding test class AsynchronousTest and test method nextStepFuture_testUpdateAllNextStep to cover test this method
      */
-    //[public | private ] [static] data_type method_name (input parameters) {
+
+     @future
+    public  static void  nextStepFutureMethod() {
     //  The body of the method
-    //}
+    List<Account> accounts = [SELECT Id FROM Account];
+    for (Account acc : accounts) {
+        acc.Next_Step__c = 'Meeting in the future';
+    }
+    if (!accounts.isEmpty()) {
+        update accounts;
+    }
+
+    List<Opportunity> opps = [SELECT Id FROM Opportunity];
+    for (Opportunity opp : opps) {
+        opp.NextStep = 'Meeting in the future';
+    }
+    if (!opps.isEmpty()) {
+        update opps;
+    }
+    }
 
     /*
     * Question 2
@@ -38,10 +55,16 @@ public with sharing class NextStepFuture {
     * Update the corresponding test class AsynchronousTest and test method nextStepFuture_testCreateDealAndUpdateRole to cover test this method
     */
     //Mix DML Error happens when you try to perform DML operations on setup and non-setup objects in a single transaction.
+    
     public static void createDealAndUpdateRole() {
         Opportunity bigDeal = new Opportunity();
         insertBigDeal(bigDeal);
+        updateUserRoleFuture();
+       
+    }
 
+    @future 
+    private static void updateUserRoleFuture() {
         UserRole[] roles = [SELECT Id, Name FROM UserRole WHERE Id = :UserInfo.getUserRoleId() OR Name = 'CRO' LIMIT 1];
         updateUserRoleName(roles);
     }
